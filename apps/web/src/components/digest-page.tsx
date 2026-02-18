@@ -126,95 +126,153 @@ export function DigestPage({
 
   return (
     <main className="page">
+      {/* Hero Section */}
       <header className="hero">
         <p className="eyebrow">GLOBAL AI DAILY BRIEF</p>
         <h1>AIScan</h1>
-        <p className="subtitle">四大方向各 20 条：Product Hunt / Hugging Face / Reddit / X。</p>
+        <p className="subtitle">
+          每日精选 AI 领域最新动态 · 四大方向各 20 条：Product Hunt / Hugging Face / Reddit / X
+        </p>
 
+        {/* 统计信息 */}
         <div className="meta-row">
-          <span>日期 {digest.date}</span>
-          <span>总条目 {digest.items.length}</span>
-          <span>高置信 {highConfidenceCount}</span>
+          <span>📅 {digest.date}</span>
+          <span>📊 总条目 {digest.items.length}</span>
+          <span>⭐ 高置信 {highConfidenceCount}</span>
         </div>
 
-        <div className="nav-row">
-          <Link href={`/date/${nextDate(digest.date, -1)}?source=${filter}`}>← 前一天</Link>
-          <Link href={`/date/${nextDate(digest.date, 1)}?source=${filter}`}>后一天 →</Link>
-        </div>
+        {/* 日期导航 */}
+        <nav className="nav-row" aria-label="日期导航">
+          <Link href={`/date/${nextDate(digest.date, -1)}?source=${filter}`} className="nav-link">
+            ← 前一天
+          </Link>
+          <Link href={`/date/${nextDate(digest.date, 1)}?source=${filter}`} className="nav-link">
+            后一天 →
+          </Link>
+        </nav>
 
-        <div className="filter-row">
+        {/* 筛选器 */}
+        <nav className="filter-row" aria-label="内容筛选">
           <Link href={`/date/${digest.date}?source=all`} data-active={filter === "all"}>
             全部
           </Link>
           <Link href={`/date/${digest.date}?source=product`} data-active={filter === "product"}>
-            产品爆发
+            🚀 产品爆发
           </Link>
           <Link href={`/date/${digest.date}?source=tech`} data-active={filter === "tech"}>
-            技术方向
+            🔬 技术方向
           </Link>
           <Link href={`/date/${digest.date}?source=community`} data-active={filter === "community"}>
-            开发者共识
+            💬 开发者共识
           </Link>
           <Link href={`/date/${digest.date}?source=x`} data-active={filter === "x"}>
-            X 趋势
+            🐦 X 趋势
           </Link>
-        </div>
+        </nav>
       </header>
 
-      <section className="radar-grid">
+      {/* Radar 概览 */}
+      <section className="radar-grid" aria-label="数据源概览">
         {radarSummary.map((bucket) => (
           <Link
             className="radar-card"
             href={`/date/${digest.date}?source=${bucket.key}`}
             key={bucket.key}
             data-filter={bucket.key}
+            aria-label={`查看 ${bucket.title}`}
           >
             <p className="radar-title">{bucket.title}</p>
             <p className="radar-subtitle">{bucket.subtitle}</p>
             <p className="radar-count">{bucket.count} 条</p>
-            <p className="radar-highlight">{bucket.highlight}</p>
+            <p className="radar-highlight" title={bucket.highlight}>
+              {bucket.highlight}
+            </p>
           </Link>
         ))}
       </section>
 
+      {/* 内容列表 */}
       {items.length === 0 ? (
-        <section className="empty">
+        <section className="empty" role="status">
           <h2>暂无可展示内容</h2>
           <p>今日数据还在生成中，稍后刷新或切换到其他日期查看。</p>
         </section>
       ) : (
-        <section className="cards">
-          {items.map((item) => (
-            <article className="card" key={`${item.rank}-${item.url}`}>
-              <div className="card-top">
-                <span className="rank">#{item.rank}</span>
-                <span className={`confidence ${item.confidenceLabel}`}>{formatConfidence(item.confidenceLabel)}</span>
-                <span className="score">热度 {item.score.toFixed(3)}</span>
-                {item.isRecurringHot ? <span className="score">持续热点 {item.streakDays} 天</span> : null}
-              </div>
-              <h2>{item.title}</h2>
-              <p className="summary">{item.summary}</p>
-              <div className="tag-row">
-                {item.insightTags.map((tag) => (
-                  <span key={`${item.rank}-${tag}`} className="tag">
-                    {tag}
+        <section className="cards" aria-label="趋势列表">
+          {items.map((item) => {
+            const category = formatCategory(item.trendCategory);
+            return (
+              <article className="card" key={`${item.rank}-${item.url}`}>
+                {/* 卡片头部 */}
+                <div className="card-top">
+                  <span className="rank" aria-label={`排名第 ${item.rank}`}>
+                    #{item.rank}
                   </span>
-                ))}
-              </div>
-              <p className="meta">
-                <span className="meta-category">{formatCategory(item.trendCategory).label}</span>
-                {item.sourceName} · {formatTime(item.publishedAt)} · {item.bucket === "MEDIA" ? "研究者分享" : "实用一手"}
-              </p>
-              <a href={item.url} target="_blank" rel="noreferrer">
-                查看原文
-              </a>
-            </article>
-          ))}
+                  <span className={`confidence ${item.confidenceLabel}`} aria-label="置信度">
+                    {formatConfidence(item.confidenceLabel)}
+                  </span>
+                  <span className="score" aria-label="热度分数">
+                    🔥 {item.score.toFixed(3)}
+                  </span>
+                  {item.isRecurringHot && (
+                    <span className="score" aria-label="持续热点">
+                      🔁 持续 {item.streakDays} 天
+                    </span>
+                  )}
+                </div>
+
+                {/* 标题 */}
+                <h2>{item.title}</h2>
+
+                {/* 摘要 */}
+                <p className="summary">{item.summary}</p>
+
+                {/* 标签 */}
+                {item.insightTags.length > 0 && (
+                  <div className="tag-row" aria-label="相关标签">
+                    {item.insightTags.map((tag) => (
+                      <span key={`${item.rank}-${tag}`} className="tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* 元信息 */}
+                <div className="meta">
+                  <span className="meta-category" data-filter={category.filter}>
+                    {category.label}
+                  </span>
+                  <span>{item.sourceName}</span>
+                  <span>·</span>
+                  <time dateTime={item.publishedAt ?? undefined}>{formatTime(item.publishedAt)}</time>
+                  <span>·</span>
+                  <span>{item.bucket === "MEDIA" ? "📚 研究者分享" : "⚡ 实用一手"}</span>
+                </div>
+
+                {/* 查看原文链接 */}
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`查看 ${item.title} 的原文`}
+                >
+                  查看原文
+                </a>
+              </article>
+            );
+          })}
         </section>
       )}
 
+      {/* Footer */}
       <footer className="footer">
-        <p>来源覆盖：Product Hunt AI、新模型趋势、Reddit 开发者讨论、研究者 X 分享。</p>
+        <p>
+          数据来源：Product Hunt AI · Hugging Face Trending · Reddit LocalLLaMA/LocalLLM · X/Twitter AI 圈
+        </p>
+        <p style={{ marginTop: "8px", fontSize: "12px", opacity: 0.7 }}>
+          每日自动更新 · 智能筛选 · 多维度分析
+        </p>
       </footer>
     </main>
   );

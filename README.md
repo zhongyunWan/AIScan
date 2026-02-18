@@ -2,6 +2,16 @@
 
 轻量级每日 AI 热点 Web 应用（Next.js + PostgreSQL + Docker Compose）。
 
+## ✨ 特性
+
+- 🎨 **现代化设计系统** - 美观、大方、年轻化的视觉风格
+- 📊 **智能数据聚合** - 每日固定产出四大方向 AI 趋势（每方向 20 条，共 80 条）
+- 🌐 **多源信息整合** - Product Hunt / Hugging Face / Reddit / X 四大数据源
+- 🔍 **灵活筛选** - 支持按日期查看历史日报,按方向筛选内容
+- 🎯 **置信度评分** - 智能评估内容质量,高置信度优先展示
+- 🔄 **持续热点追踪** - 7 天持续热点重复衰减机制
+- 📱 **响应式设计** - 完美适配桌面端和移动端
+
 ## 功能
 - 每日固定产出四大方向 AI 趋势（每方向 20 条，共 80 条）
 - 中文摘要 + 英文原文链接
@@ -11,11 +21,53 @@
 - 支持 7 天持续热点重复衰减
 - 支持每方向固定配额（默认 20 条/方向）与方向内排序
 
-## 目录
-- `/Users/wanzhongyun/github/AIScan/specs`：产品/技术/验收规范
-- `/Users/wanzhongyun/github/AIScan/skills`：vibe coding skills
-- `/Users/wanzhongyun/github/AIScan/apps/web`：Next.js 应用
-- `/Users/wanzhongyun/github/AIScan/nginx`：Nginx 反代配置
+## 📁 目录结构
+
+```
+AIScan/
+├── specs/              # 产品/技术/验收规范
+├── skills/             # Vibe coding skills
+├── apps/web/           # Next.js 应用
+│   ├── src/
+│   │   ├── app/        # Next.js App Router
+│   │   ├── components/ # React 组件
+│   │   ├── lib/        # 业务逻辑和工具
+│   │   └── styles/     # 设计系统样式
+│   │       ├── design-system.css  # 原始设计令牌
+│   │       ├── tokens.css         # 语义化令牌
+│   │       ├── base.css           # 基础样式
+│   │       └── components.css     # 组件样式
+│   ├── prisma/         # 数据库 Schema
+│   └── DESIGN_SYSTEM.md # 设计系统文档
+└── nginx/              # Nginx 反代配置
+```
+
+## 🎨 设计系统
+
+AIScan 采用统一的设计系统,确保视觉一致性和易维护性。详细文档请查看 [`apps/web/DESIGN_SYSTEM.md`](apps/web/DESIGN_SYSTEM.md)。
+
+### 核心特点
+
+- **颜色系统**: 青绿色主色 + 紫色辅助色,浅色调为主
+- **排版系统**: 完整的字体大小、行高、字重规范
+- **间距系统**: 基于 4px 网格的统一间距
+- **组件库**: 可复用的按钮、卡片、徽章等组件
+- **响应式**: 完善的断点系统,适配各种设备
+
+### 快速使用
+
+所有样式通过 CSS 变量管理:
+
+```css
+/* 使用语义化令牌 */
+.my-element {
+  color: var(--text-primary);
+  background: var(--surface-primary);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+```
 
 ## 快速开始（本地）
 1. 安装依赖
