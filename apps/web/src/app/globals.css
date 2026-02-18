@@ -1,0 +1,281 @@
+:root {
+  --bg: #f4f7f8;
+  --paper: #ffffff;
+  --ink: #0f1e2a;
+  --muted: #5d6a73;
+  --line: #dbe1e6;
+  --accent: #0f7d86;
+  --accent-soft: #dff2f1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", "Avenir Next", sans-serif;
+  background:
+    radial-gradient(circle at 8% -3%, #def2ee 0, transparent 45%),
+    radial-gradient(circle at 95% 3%, #edf4ff 0, transparent 35%),
+    var(--bg);
+}
+
+a {
+  color: inherit;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 16px 56px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 42px;
+  letter-spacing: -0.03em;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.meta-row,
+.nav-row,
+.filter-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 13px;
+  color: #425260;
+}
+
+.nav-row a,
+.filter-row a {
+  text-decoration: none;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.75);
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.filter-row a[data-active="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-soft);
+}
+
+.radar-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.radar-card {
+  display: block;
+  text-decoration: none;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(244, 250, 251, 0.96));
+  border: 1px solid #d7e6ea;
+  border-radius: 12px;
+  padding: 12px 12px 11px;
+}
+
+.radar-card[data-filter="product"] {
+  border-color: #d7e7ff;
+}
+
+.radar-card[data-filter="tech"] {
+  border-color: #d2ece7;
+}
+
+.radar-card[data-filter="community"] {
+  border-color: #ede3d2;
+}
+
+.radar-card[data-filter="x"] {
+  border-color: #e4dbf7;
+}
+
+.radar-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #123446;
+}
+
+.radar-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #5c6d79;
+}
+
+.radar-count {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #2e4956;
+}
+
+.radar-highlight {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #223a48;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cards {
+  margin-top: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(16, 39, 53, 0.03);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.rank {
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.confidence {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.confidence.high {
+  color: #166a2f;
+}
+
+.confidence.medium {
+  color: #936a0d;
+}
+
+.confidence.low {
+  color: #9e3a34;
+}
+
+.card h2 {
+  margin: 10px 0 8px;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.summary {
+  margin: 0;
+  color: #203844;
+  font-size: 17px;
+  line-height: 1.72;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.tag-row {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #eef5f4;
+  color: #2a6161;
+  border: 1px solid #d5e7e5;
+}
+
+.meta {
+  margin: 12px 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.meta-category {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #d8e8e7;
+  background: #f2f8f7;
+  color: #2a6f70;
+  font-size: 12px;
+}
+
+.card > a {
+  text-decoration: none;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.empty {
+  margin-top: 18px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--paper);
+}
+
+.footer {
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 34px;
+  }
+
+  .radar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card h2 {
+    font-size: 19px;
+  }
+
+  .summary {
+    font-size: 16px;
+  }
+}

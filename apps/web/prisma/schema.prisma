@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  OFFICIAL
+  RESEARCH
+  MEDIA
+}
+
+enum SourceProvider {
+  RSS
+  REDDIT_JSON
+  ARXIV
+  GITHUB_RELEASES
+  GITHUB_REPOS
+  OPENREVIEW
+  HUGGINGFACE
+  OPENROUTER
+  PAPERS_WITH_CODE
+  WEB
+  SOCIAL_AGG_A
+  SOCIAL_AGG_B
+}
+
+enum SourceBucket {
+  PRACTICAL
+  MEDIA
+}
+
+enum ReliabilityLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum JobType {
+  INGEST
+  PUBLISH
+}
+
+model Source {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  url              String
+  feedUrl          String?
+  provider         SourceProvider
+  type             SourceType
+  bucket           SourceBucket     @default(PRACTICAL)
+  enabled          Boolean          @default(true)
+  sourceWeight     Float
+  reliabilityLevel ReliabilityLevel
+  healthStatus     String           @default("healthy")
+  failureStreak    Int              @default(0)
+  lastSuccessAt    DateTime?
+  config           Json?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  rawItems         RawItem[]
+  normalizedItems  NormalizedItem[]
+
+  @@map("sources")
+}
+
+model RawItem {
+  id                 String          @id @default(cuid())
+  sourceId           String
+  source             Source          @relation(fields: [sourceId], references: [id])
+  externalId         String
+  title              String
+  url                String
+  publishedAt        DateTime?
+  content            String?
+  author             String?
+  language           String?
+  engagementProxy    Float           @default(0)
+  rawPayload         Json?
+  hash               String
+  ingestedAt         DateTime        @default(now())
+  normalizationState String          @default("pending")
+  normalizedItem     NormalizedItem?
+
+  @@index([sourceId, ingestedAt])
+  @@index([hash])
+  @@unique([sourceId, externalId])
+  @@map("raw_items")
+}
+
+model NormalizedItem {
+  id                String            @id @default(cuid())
+  rawItemId         String            @unique
+  rawItem           RawItem           @relation(fields: [rawItemId], references: [id])
+  sourceId          String
+  source            Source            @relation(fields: [sourceId], references: [id])
+  title             String
+  summary           String
+  canonicalUrl      String
+  titleHash         String
+  contentHash       String
+  contentSnippet    String
+  publishedAt       DateTime?
+  sourceWeight      Float
+  reliabilityLevel  ReliabilityLevel
+  engagementProxy   Float
+  practicalScore    Float             @default(0.5)
+  originLinkCount   Int               @default(1)
+  authorReputation  Float             @default(0.5)
+  authorHandle      String?
+  isSocialInsight   Boolean           @default(false)
+  hasPrimarySource  Boolean           @default(true)
+  isLowConfidence   Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  eventClusters     EventCluster[]
+  dailyDigestItems  DailyDigestItem[]
+
+  @@index([canonicalUrl])
+  @@index([titleHash])
+  @@index([publishedAt])
+  @@map("normalized_items")
+}
+
+model EventCluster {
+  id                   String          @id @default(cuid())
+  digestDate           DateTime
+  clusterKey           String
+  sourceCount          Int
+  crossSourceConfirm   Float
+  representativeItemId String
+  representativeItem   NormalizedItem  @relation(fields: [representativeItemId], references: [id])
+  createdAt            DateTime        @default(now())
+  digestItems          DailyDigestItem[]
+
+  @@index([digestDate])
+  @@unique([digestDate, clusterKey])
+  @@map("event_clusters")
+}
+
+model DailyDigestItem {
+  id               String         @id @default(cuid())
+  digestDate       DateTime
+  rank             Int
+  score            Float
+  bucket           SourceBucket    @default(PRACTICAL)
+  confidenceLabel  String
+  isRecurringHot   Boolean         @default(false)
+  streakDays       Int             @default(1)
+  repeatDecay      Float           @default(1)
+  clusterId        String
+  cluster          EventCluster   @relation(fields: [clusterId], references: [id])
+  normalizedItemId String
+  normalizedItem   NormalizedItem @relation(fields: [normalizedItemId], references: [id])
+  createdAt        DateTime       @default(now())
+
+  @@index([digestDate])
+  @@unique([digestDate, rank])
+  @@map("daily_digest_items")
+}
+
+model JobRun {
+  id             String   @id @default(cuid())
+  jobType        JobType
+  status         String
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+  processedCount Int      @default(0)
+  failedCount    Int      @default(0)
+  details        Json?
+
+  @@map("job_runs")
+}

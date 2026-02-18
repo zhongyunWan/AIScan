@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aiscan
+      POSTGRES_PASSWORD: aiscan
+      POSTGRES_DB: aiscan
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiscan -d aiscan"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://aiscan:aiscan@postgres:5432/aiscan
+      INTERNAL_API_KEY: change-me-in-production
+      PUBLISH_TIME: "09:00"
+      ENABLE_SCHEDULER: "true"
+      TZ: Asia/Shanghai
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - web
+
+volumes:
+  pg_data:

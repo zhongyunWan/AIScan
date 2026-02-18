@@ -1,0 +1,12 @@
+node_modules
+.env
+.env.local
+.DS_Store
+coverage
+npm-debug.log*
+.yarn
+pnpm-lock.yaml
+apps/web/.next
+apps/web/node_modules
+apps/web/prisma/dev.db
+apps/web/prisma/dev.db-journal
