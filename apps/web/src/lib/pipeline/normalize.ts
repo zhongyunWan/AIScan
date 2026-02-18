@@ -5,6 +5,7 @@ import {
   stripHtml,
   stableHash,
   summarizeToChinese,
+  generateSummaryWithLLM,
 } from "@/lib/utils/text";
 
 function asNumber(input: unknown, fallback: number): number {
@@ -52,6 +53,15 @@ export async function normalizeRecentRawItems(hoursWindow = 72): Promise<number>
     const isSocialInsight = raw.source.bucket === "MEDIA";
     const hasPrimarySource = raw.source.bucket !== "MEDIA";
 
+    const llmSummary = await generateSummaryWithLLM({
+      title: displayTitle,
+      content: contentSnippet || raw.title,
+      sourceName: raw.source.name,
+      sourceType: raw.source.type,
+    });
+
+    const summary = llmSummary ?? summarizeToChinese(contentSnippet || raw.title, displayTitle);
+
     const originLinks = asArray(rawPayload.quotedLinks);
     const originLinkCount =
       asNumber(rawPayload.originLinkCount, Number.NaN) || (originLinks.length > 0 ? originLinks.length : 0);
@@ -65,7 +75,7 @@ export async function normalizeRecentRawItems(hoursWindow = 72): Promise<number>
         rawItemId: raw.id,
         sourceId: raw.sourceId,
         title: displayTitle,
-        summary: summarizeToChinese(contentSnippet || raw.title, displayTitle),
+        summary,
         canonicalUrl,
         titleHash,
         contentHash,
@@ -85,7 +95,7 @@ export async function normalizeRecentRawItems(hoursWindow = 72): Promise<number>
       update: {
         sourceId: raw.sourceId,
         title: displayTitle,
-        summary: summarizeToChinese(contentSnippet || raw.title, displayTitle),
+        summary,
         canonicalUrl,
         titleHash,
         contentHash,

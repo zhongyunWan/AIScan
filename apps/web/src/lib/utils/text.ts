@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 
+import { LLM_API_KEY, LLM_BASE_URL, LLM_ENABLED, LLM_MODEL } from "@/lib/config";
+
 export function stableHash(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -201,4 +203,109 @@ export function extractInsightTags(input: {
   }
 
   return tags.slice(0, 3);
+}
+
+export interface LLMGenerateSummaryOptions {
+  title: string;
+  content: string;
+  sourceName?: string;
+  sourceType?: string;
+}
+
+const SUMMARY_SYSTEM_PROMPT = `你是一个专业的 AI 技术资讯摘要助手。你的任务是为每条 AI 资讯生成一个简洁、有信息量的中文摘要（30-80 字），帮助用户快速了解内容核心价值。
+
+要求：
+1. 直接说明这条资讯是什么、有什么特别之处
+2. 如果是产品发布，说明是什么产品、解决什么问题、有什么亮点
+3. 如果是技术内容，说明技术方向、关键特性
+4. 如果是评测/榜单，指出评测对象和结果
+5. 不要使用"属于 XX 信息"这类模板，直接陈述事实
+6. 保持简洁，一句话讲清楚`;
+
+const SUMMARY_USER_PROMPT = `请为以下 AI 资讯生成简洁摘要：
+
+标题：{{title}}
+来源：{{source}}
+内容：{{content}}
+
+要求：30-80 字，直接说明核心信息，不要啰嗦。`;
+
+function buildSummaryPrompt(options: LLMGenerateSummaryOptions): string {
+  return SUMMARY_USER_PROMPT.replace("{{title}}", options.title)
+    .replace("{{source}}", options.sourceName ?? "未知来源")
+    .replace("{{content}}", options.content.slice(0, 1000));
+}
+
+export async function generateSummaryWithLLM(options: LLMGenerateSummaryOptions): Promise<string | null> {
+  console.log("[LLM] generateSummaryWithLLM called, LLM_ENABLED:", LLM_ENABLED, "LLM_BASE_URL:", LLM_BASE_URL);
+
+  if (!LLM_ENABLED) {
+    console.log("[LLM] LLM not enabled, returning null");
+    return null;
+  }
+
+  try {
+    const isMinimax = LLM_BASE_URL.includes("minimax");
+    console.log("[LLM] isMinimax:", isMinimax, "model:", LLM_MODEL);
+
+    let endpoint: string;
+    let headers: Record<string, string>;
+    let body: Record<string, unknown>;
+
+    if (isMinimax) {
+      endpoint = `${LLM_BASE_URL}/v1/text/chatcompletion_v2`;
+      headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${LLM_API_KEY}`,
+      };
+      body = {
+        model: LLM_MODEL,
+        messages: [
+          { role: "system", content: SUMMARY_SYSTEM_PROMPT },
+          { role: "user", content: buildSummaryPrompt(options) },
+        ],
+        max_tokens: 200,
+        temperature: 0.3,
+      };
+    } else {
+      endpoint = `${LLM_BASE_URL}/chat/completions`;
+      headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${LLM_API_KEY}`,
+      };
+      body = {
+        model: LLM_MODEL,
+        messages: [
+          { role: "system", content: SUMMARY_SYSTEM_PROMPT },
+          { role: "user", content: buildSummaryPrompt(options) },
+        ],
+        max_tokens: 200,
+        temperature: 0.3,
+      };
+    }
+
+    console.log("[LLM] Calling endpoint:", endpoint);
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[LLM] API error: ${response.status} ${response.statusText}`, errorText);
+      return null;
+    }
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    console.log("[LLM] Response data:", JSON.stringify(data));
+    const content = data.choices?.[0]?.message?.content?.trim() ?? null;
+    return content;
+  } catch (error) {
+    console.error("[LLM] summary generation failed:", error);
+    return null;
+  }
 }

@@ -17,3 +17,9 @@ export const TREND_CATEGORY_ORDER = [
 export const DIGEST_TARGET_PER_CATEGORY = 20;
 export const DIGEST_TARGET_SIZE = TREND_CATEGORY_ORDER.length * DIGEST_TARGET_PER_CATEGORY;
 export const SIMILARITY_THRESHOLD = 0.88;
+
+export const LLM_PROVIDER = process.env.LLM_PROVIDER ?? "openai";
+export const LLM_API_KEY = process.env.LLM_API_KEY ?? "";
+export const LLM_BASE_URL = process.env.LLM_BASE_URL ?? "https://api.openai.com/v1";
+export const LLM_MODEL = process.env.LLM_MODEL ?? "gpt-4o-mini";
+export const LLM_ENABLED = LLM_API_KEY.length > 0;
