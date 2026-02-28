@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm install)",
+      "Bash(npm *)",
+      "Bash(go run *)",
+      "Bash(go test *)",
+      "Bash(go mod *)",
+      "Bash(git *)",
+      "Edit(/frontend/**)",
+      "Edit(/backend/**)"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}
